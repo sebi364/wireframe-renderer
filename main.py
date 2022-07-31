@@ -244,7 +244,6 @@ for line in file.readlines():
 obj = Mesh(triangles)
 
 obj.move(0,0,10)
-print(obj)
 
 while running:
     delta = time.time() - last_time
