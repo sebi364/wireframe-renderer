@@ -6,10 +6,10 @@ import sys
 import time
 
 DIST = 1.0
-FOV_X = 1.0
+FOV_X = 1.5
 FOV_Y = 1.0
 MESH_COLOR = [1,1,1]
-RES_X = 1000
+RES_X = 1500
 RES_Y = 1000
 ROTATION_SPEED = 2
 MOVE_SPEED = 5
@@ -23,6 +23,9 @@ class V:
         self.x = x
         self.y = y
         self.z = z
+
+    def __repr__(self):
+        return "("+str(self.x)+","+str(self.y)+","+str(self.z)+")"
 
     def project2D(self):
         x = (self.x/self.z*DIST+FOV_X/2.0)*RES_X/FOV_X
@@ -44,9 +47,6 @@ class V:
         self.x += dx
         self.y += dy
         self.z += dz
-
-    def repr(self):
-        return "("+str(self.x)+","+str(self.y)+","+str(self.z)+")"
 
     def draw(self,screen):
         pygame.draw.circle(screen,'red',self.project2D(),10,2)
@@ -76,11 +76,15 @@ class L:
     def draw(self,screen):
         pygame.draw.line(screen,'white',self.p1.project2D(),self.p2.project2D(),2)
 
+
 class T:
     def __init__(self,p1,p2,p3):
         self.p1 = p1
         self.p2 = p2
         self.p3 = p3
+
+    def __repr__(self):
+        return "T["+str(self.p1)+","+str(self.p2)+","+str(self.p3)+"]"
 
     def rotZ(self,xc,yc,angle):
         self.p1.rotZ(xc,yc,angle)
@@ -114,10 +118,8 @@ class T:
             light = abs(155*dot)+100
             color = (light*MESH_COLOR[0], light*MESH_COLOR[1], light*MESH_COLOR[2])
             pygame.draw.polygon(screen,color,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()])
-            pygame.draw.polygon(screen,'green',[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()],2)
+            pygame.draw.polygon(screen,'darkgray',[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()],1)
 
-    def repr(self):
-        return "T["+self.p1.repr()+","+self.p2.repr()+","+self.p3.repr()+"]"
 
     def center(self):
         return V((self.p1.x+self.p2.x+self.p3.x)/3.0, (self.p1.y+self.p2.y+self.p3.y)/3.0, (self.p1.z+self.p2.z+self.p3.z)/3.0)
@@ -169,8 +171,8 @@ class Mesh:
         return(V(x/len(triangles),y/len(triangles),z/len(triangles)))
 
 
-    def repr(self):
-        return "Mesh:"+" ".join(t.repr() for t in self.triangles)
+    def __repr__(self):
+        return "Mesh:"+" ".join(str(t) for t in self.triangles)
 
     def draw(self, screen):
         list = []
@@ -218,7 +220,8 @@ pygame.init()
 screen = pygame.display.set_mode([RES_X, RES_Y])
 
 
-file = open(sys.argv[1],'r')
+# file = open(sys.argv[1],'r')
+file = open("face.obj", "r")
 verticies = []
 triangles = []
 for line in file.readlines():
@@ -239,17 +242,18 @@ for line in file.readlines():
 
 
 
-object = Mesh(triangles)
+obj = Mesh(triangles)
 
-object.move(0,0,10)
+obj.move(0,0,10)
+print(obj)
 
 while running:
     delta = time.time() - last_time
     last_time = time.time()
 
     screen.fill('black')
-    object.draw(screen)
-    get_input(object)
+    obj.draw(screen)
+    get_input(obj)
     pygame.display.update()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
