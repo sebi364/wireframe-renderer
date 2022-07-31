@@ -3,6 +3,7 @@ from math import sin,cos,sqrt
 from copy import copy
 import pygame
 import sys
+import time
 
 DIST = 1.0
 FOV_X = 1.0
@@ -10,9 +11,12 @@ FOV_Y = 1.0
 MESH_COLOR = [1,1,1]
 RES_X = 1000
 RES_Y = 1000
-ROTATION_SPEED = 0.002
-MOVE_SPEED = 0.005
+ROTATION_SPEED = 2
+MOVE_SPEED = 5
 running = True
+
+last_time = 0
+delta = 0
 
 class V:
     def __init__(self, x,y,z):
@@ -181,34 +185,34 @@ def get_input(object):
     keys = pygame.key.get_pressed()
     center = object.center()
     if keys[pygame.K_UP]:
-        object.rotX(center.z,center.y,ROTATION_SPEED)
+        object.rotX(center.z,center.y,ROTATION_SPEED*delta)
     if keys[pygame.K_DOWN]:
-        object.rotX(center.z,center.y,-ROTATION_SPEED)
+        object.rotX(center.z,center.y,-ROTATION_SPEED*delta)
 
     if keys[pygame.K_LEFT]:
-        object.rotY(center.x,center.z,-ROTATION_SPEED)
+        object.rotY(center.x,center.z,-ROTATION_SPEED*delta)
     if keys[pygame.K_RIGHT]:
-        object.rotY(center.x,center.z,ROTATION_SPEED)
+        object.rotY(center.x,center.z,ROTATION_SPEED*delta)
 
     if keys[pygame.K_PAGEUP]:
-        object.rotZ(center.x,center.y,ROTATION_SPEED)
+        object.rotZ(center.x,center.y,ROTATION_SPEED*delta)
     if keys[pygame.K_PAGEDOWN]:
-        object.rotZ(center.x,center.y,-ROTATION_SPEED)
+        object.rotZ(center.x,center.y,-ROTATION_SPEED*delta)
 
     if keys[pygame.K_e]:
-        object.move(0,-MOVE_SPEED,0)
+        object.move(0,-MOVE_SPEED*delta,0)
     if keys[pygame.K_q]:
-        object.move(0,MOVE_SPEED,0)
+        object.move(0,MOVE_SPEED*delta,0)
 
     if keys[pygame.K_d]:
-        object.move(-MOVE_SPEED,0,0)
+        object.move(-MOVE_SPEED*delta,0,0)
     if keys[pygame.K_a]:
-        object.move(MOVE_SPEED,0,0)
+        object.move(MOVE_SPEED*delta,0,0)
 
     if keys[pygame.K_w]:
-        object.move(0,0,-MOVE_SPEED)
+        object.move(0,0,-MOVE_SPEED*delta)
     if keys[pygame.K_s]:
-        object.move(0,0,MOVE_SPEED)
+        object.move(0,0,MOVE_SPEED*delta)
 
 pygame.init()
 screen = pygame.display.set_mode([RES_X, RES_Y])
@@ -240,6 +244,9 @@ object = Mesh(triangles)
 object.move(0,0,10)
 
 while running:
+    delta = time.time() - last_time
+    last_time = time.time()
+
     screen.fill('black')
     object.draw(screen)
     get_input(object)
