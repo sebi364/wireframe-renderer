@@ -220,8 +220,7 @@ pygame.init()
 screen = pygame.display.set_mode([RES_X, RES_Y])
 
 
-# file = open(sys.argv[1],'r')
-file = open("face.obj", "r")
+file = open(sys.argv[1],'r')
 verticies = []
 triangles = []
 for line in file.readlines():
