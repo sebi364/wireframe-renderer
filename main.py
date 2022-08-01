@@ -252,7 +252,7 @@ def get_input(object):
         object.move(0,0,MOVE_SPEED*delta)
 
 pygame.init()
-screen = pygame.display.set_mode([RES_X, RES_Y])
+screen = pygame.display.set_mode([RES_X, RES_Y],pygame.RESIZABLE)
 
 
 obj = Mesh()
@@ -260,6 +260,10 @@ obj = Mesh()
 obj.move(0,0,10)
 
 while running:
+    RES_X,RES_Y = screen.get_size()
+    FOV_X = RES_X / 1000
+    FOV_Y = RES_Y / 1000
+
     delta = time.time() - last_time
     last_time = time.time()
 
