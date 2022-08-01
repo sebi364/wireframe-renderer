@@ -12,7 +12,7 @@ FOV_Y = 1.0
 RES_X = 1500
 RES_Y = 1000
 #theme
-MESH_COLOR = [255,255,255]
+TRIANGLE_COLOR = [255,255,255]
 WIREFRAME_COLOR = [128,128,128]
 VERTICES_COLOR = [0,255,0]
 NORMALS_COLOR = [255,255,0]
@@ -40,12 +40,12 @@ class V:
 
     def __repr__(self):
         return "("+str(self.x)+","+str(self.y)+","+str(self.z)+")"
-
+    #calculate 2D coordinates for the screen
     def project2D(self):
         x = (self.x/self.z*DIST+FOV_X/2.0)*RES_X/FOV_X
         y = -(self.y/self.z*DIST-FOV_Y/2.0)*RES_Y/FOV_Y
         return(x,y)
-
+    #calculate rotation using some black magic
     def rotZ(self,xc,yc,angle):
         (self.x, self.y) = ((self.x-xc)*cos(angle)-(self.y-yc)*sin(angle)+xc,
                             (self.x-xc)*sin(angle)+(self.y-yc)*cos(angle)+yc)
@@ -57,6 +57,7 @@ class V:
     def rotY(self,xc,zc,angle):
         (self.x, self.z) = ((self.x-xc)*cos(angle)-(self.z-zc)*sin(angle)+xc,
                             (self.x-xc)*sin(angle)+(self.z-zc)*cos(angle)+zc)
+    #calculate simple movement
     def move(self,dx,dy,dz):
         self.x += dx
         self.y += dy
@@ -88,7 +89,7 @@ class L:
         self.p2.move(dx,dy,dz)
 
     def draw(self,screen):
-        pygame.draw.line(screen,'yellow',self.p1.project2D(),self.p2.project2D(),2)
+        pygame.draw.line(screen,'white',self.p1.project2D(),self.p2.project2D(),2)
 
 
 class T:
@@ -123,26 +124,25 @@ class T:
     def draw(self,screen):
         normal = self.normal()
         c = self.center()
-        # from now we treat c as vector, not point
-        # it now points from camera to triangle
-        # get length of c
+        #from now we treat c as vector, not point
+        #it now points from camera to triangle
+        #get length of c
         l = sqrt(c.x*c.x+c.y*c.y+c.z*c.z)
-        # normalize c to length 1 and invert direction
-        # (it will point from triangle to camera)
+        #normalize c to length 1 + invert direction
         c.x = -c.x / l
         c.y = -c.y / l
         c.z = -c.z / l
-        # calculate dot product between two vectors
-        # this will return between 1.0 (if angle is 0)
-        # and 0.0 (if angle is 90)
+        #calculate dot product between two vectors
+        #this will return between 1.0 (if angle is 0) and 0.0 (if angle is 90)
+        #source = https://www.wikihow.com/Find-the-Angle-Between-Two-Vectors
         dotproduct = normal.x * c.x + normal.y * c.y + normal.z * c.z
 
         if RENDER_HIDDEN_TRIANGLES:
             light = abs(155*dotproduct)+100
             if RENDER_TRIANGLES:
-                color = (light*MESH_COLOR[0]/255,
-                        light*MESH_COLOR[1]/255,
-                        light*MESH_COLOR[2]/255)
+                color = (light*TRIANGLE_COLOR[0]/255,
+                        light*TRIANGLE_COLOR[1]/255,
+                        light*TRIANGLE_COLOR[2]/255)
                 pygame.draw.polygon(screen,color,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()])
             if RENDER_WIREFRAME:
                 pygame.draw.polygon(screen,WIREFRAME_COLOR,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()],1)
@@ -160,9 +160,9 @@ class T:
             if (dotproduct>=0):
                 light = abs(155*dotproduct)+100
                 if RENDER_TRIANGLES:
-                    color = (light*MESH_COLOR[0]/255,
-                             light*MESH_COLOR[1]/255,
-                             light*MESH_COLOR[2]/255)
+                    color = (light*TRIANGLE_COLOR[0]/255,
+                             light*TRIANGLE_COLOR[1]/255,
+                             light*TRIANGLE_COLOR[2]/255)
                     pygame.draw.polygon(screen,color,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()])
                 if RENDER_WIREFRAME:
                     pygame.draw.polygon(screen,WIREFRAME_COLOR,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()],1)
@@ -177,24 +177,26 @@ class T:
                     pygame.draw.line(screen,NORMALS_COLOR,point1.project2D(),point2.project2D(),1)
 
     def center(self):
+        #calculate the center of the triangle
         return V((self.p1.x+self.p2.x+self.p3.x)/3.0,
                  (self.p1.y+self.p2.y+self.p3.y)/3.0,
                  (self.p1.z+self.p2.z+self.p3.z)/3.0)
 
     def normal(self):
+        #calculate vector between p1 and p2
         ux = self.p2.x-self.p1.x
         uy = self.p2.y-self.p1.y
         uz = self.p2.z-self.p1.z
-
+        #calculate vector between p1 and p3
         vx = self.p3.x-self.p1.x
         vy = self.p3.y-self.p1.y
         vz = self.p3.z-self.p1.z
-
-        # calculate normal vector to u and v
+        # calculate normal vector
+        # source = https://www.khronos.org/opengl/wiki/Calculating_a_Surface_Normal
         x=uy*vz-uz*vy
         y=uz*vx-ux*vz
         z=ux*vy-uy*vx
-        # calculate length of normal vector
+        # calculate length of normal vector so it can be shortend in the next step to 1
         l=sqrt((x*x)+(y*y)+(z*z))
         # return normal vector normalized to length=1
         return V(x/l, y/l, z/l)
@@ -203,16 +205,20 @@ class Mesh:
     def __init__(self):
         self.verticies = []
         self.triangles = []
-
+        #load the .obj file
         file = open(sys.argv[1],'r')
         for line in file.readlines():
+            #remove last character "/n"
             line = line[:-1]
+            #change window name, to name found in .obj file
             if line[0] == "o":
                 pygame.display.set_caption(line[2:])
+            #read verticies from the file and create them
             if line[0] == "v":
                 line = line[2:]
                 (x,y,z)=line.split(' ')
                 self.verticies.append(V(float(x),float(y),float(z)))
+            #read triangle from file and create it
             if line[0] == "f":
                 line = line[2:]
                 (p1,p2,p3)=line.split(' ')
@@ -235,7 +241,7 @@ class Mesh:
     def move(self,dx,dy,dz):
         for t in self.triangles:
             t.move(dx,dy,dz)
-
+    #calculate center of object by getting the average of all triangle positions
     def center(self):
         x = 0
         y = 0
