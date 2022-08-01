@@ -5,16 +5,26 @@ import pygame
 import sys
 import time
 
-DIST = 1.0
+################################################################################
+#display
 FOV_X = 1.5
 FOV_Y = 1.0
-MESH_COLOR = [1,1,1]
 RES_X = 1500
 RES_Y = 1000
+#theme
+MESH_COLOR = [255,255,255]
+WIREFRAME_COLOR = [128,128,128]
+#visibility
+RENDER_WIREFRAME = True
+RENDER_TRIANGLES = True
+RENDER_HIDDEN_TRIANGLES = False
+#movement
 ROTATION_SPEED = 2
 MOVE_SPEED = 5
-running = True
+################################################################################
 
+running = True
+DIST = 1.0
 last_time = 0
 delta = 0
 
@@ -114,11 +124,21 @@ class T:
         c.y = -c.y / l
         c.z = -c.z / l
         dot = normal.x * c.x + normal.y * c.y + normal.z * c.z
-        if (dot>=0):
+        if RENDER_HIDDEN_TRIANGLES:
             light = abs(155*dot)+100
-            color = (light*MESH_COLOR[0], light*MESH_COLOR[1], light*MESH_COLOR[2])
-            pygame.draw.polygon(screen,color,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()])
-            pygame.draw.polygon(screen,'darkgray',[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()],1)
+            color = (light*MESH_COLOR[0]/255, light*MESH_COLOR[1]/255, light*MESH_COLOR[2]/255)
+            if RENDER_TRIANGLES:
+                pygame.draw.polygon(screen,color,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()])
+            if RENDER_WIREFRAME:
+                pygame.draw.polygon(screen,WIREFRAME_COLOR,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()],1)
+        else:
+            if (dot>=0):
+                light = abs(155*dot)+100
+                color = (light*MESH_COLOR[0]/255, light*MESH_COLOR[1]/255, light*MESH_COLOR[2]/255)
+                if RENDER_TRIANGLES:
+                    pygame.draw.polygon(screen,color,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()])
+                if RENDER_WIREFRAME:
+                    pygame.draw.polygon(screen,WIREFRAME_COLOR,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()],1)
 
 
     def center(self):
