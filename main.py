@@ -17,7 +17,7 @@ WIREFRAME_COLOR = [128,128,128]
 VERTICES_COLOR = [0,255,0]
 NORMALS_COLOR = [255,255,0]
 #visibility
-RENDER_WIREFRAME = True
+RENDER_WIREFRAME = False
 RENDER_TRIANGLES = True
 RENDER_HIDDEN_TRIANGLES = False
 RENDER_VERTICES = False
@@ -31,6 +31,7 @@ running = True
 DIST = 1.0
 last_time = 0
 delta = 0
+is_fullscreen = False
 
 class V:
     def __init__(self, x,y,z):
@@ -269,6 +270,7 @@ class Mesh:
             self.triangles[i[0]].draw(screen)
 
 def get_input(object):
+    global is_fullscreen
     keys = pygame.key.get_pressed()
     center = object.center()
     if keys[pygame.K_UP]:
@@ -300,6 +302,14 @@ def get_input(object):
         object.move(0,0,-MOVE_SPEED*delta)
     if keys[pygame.K_s]:
         object.move(0,0,MOVE_SPEED*delta)
+
+    if keys[pygame.K_f]:
+        if is_fullscreen:
+            pygame.display.set_mode([RES_X, RES_Y],pygame.RESIZABLE)
+            is_fullscreen = False
+        else:
+            pygame.display.set_mode([RES_X, RES_Y],pygame.FULLSCREEN)
+            is_fullscreen = True
 
 pygame.init()
 screen = pygame.display.set_mode([RES_X, RES_Y],pygame.RESIZABLE)
