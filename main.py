@@ -14,10 +14,12 @@ RES_Y = 1000
 #theme
 MESH_COLOR = [255,255,255]
 WIREFRAME_COLOR = [128,128,128]
+VERTICES_COLOR = [0,255,0]
 #visibility
 RENDER_WIREFRAME = True
 RENDER_TRIANGLES = True
 RENDER_HIDDEN_TRIANGLES = False
+RENDER_VERTICES = False
 #movement
 ROTATION_SPEED = 2
 MOVE_SPEED = 5
@@ -59,7 +61,7 @@ class V:
         self.z += dz
 
     def draw(self,screen):
-        pygame.draw.circle(screen,'red',self.project2D(),10,2)
+        pygame.draw.circle(screen,VERTICES_COLOR,self.project2D(),3)
 
 
 class L:
@@ -124,25 +126,46 @@ class T:
         c.y = -c.y / l
         c.z = -c.z / l
         dot = normal.x * c.x + normal.y * c.y + normal.z * c.z
+
         if RENDER_HIDDEN_TRIANGLES:
             light = abs(155*dot)+100
-            color = (light*MESH_COLOR[0]/255, light*MESH_COLOR[1]/255, light*MESH_COLOR[2]/255)
+            color = (light*MESH_COLOR[0]/255,
+                     light*MESH_COLOR[1]/255,
+                     light*MESH_COLOR[2]/255)
+
             if RENDER_TRIANGLES:
                 pygame.draw.polygon(screen,color,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()])
             if RENDER_WIREFRAME:
                 pygame.draw.polygon(screen,WIREFRAME_COLOR,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()],1)
+            if RENDER_VERTICES:
+                self.p1.draw(screen)
+                self.p2.draw(screen)
+                self.p3.draw(screen)
+                c.draw(screen)
+
         else:
             if (dot>=0):
                 light = abs(155*dot)+100
-                color = (light*MESH_COLOR[0]/255, light*MESH_COLOR[1]/255, light*MESH_COLOR[2]/255)
+                color = (light*MESH_COLOR[0]/255,
+                         light*MESH_COLOR[1]/255,
+                         light*MESH_COLOR[2]/255)
+
                 if RENDER_TRIANGLES:
                     pygame.draw.polygon(screen,color,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()])
                 if RENDER_WIREFRAME:
                     pygame.draw.polygon(screen,WIREFRAME_COLOR,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()],1)
+                if RENDER_VERTICES:
+                    self.p1.draw(screen)
+                    self.p2.draw(screen)
+                    self.p3.draw(screen)
+                    c.draw(screen)
+
 
 
     def center(self):
-        return V((self.p1.x+self.p2.x+self.p3.x)/3.0, (self.p1.y+self.p2.y+self.p3.y)/3.0, (self.p1.z+self.p2.z+self.p3.z)/3.0)
+        return V((self.p1.x+self.p2.x+self.p3.x)/3.0,
+                 (self.p1.y+self.p2.y+self.p3.y)/3.0,
+                 (self.p1.z+self.p2.z+self.p3.z)/3.0)
 
     def normal(self):
         ux = self.p2.x-self.p1.x
@@ -176,7 +199,9 @@ class Mesh:
             if line[0] == "f":
                 line = line[2:]
                 (p1,p2,p3)=line.split(' ')
-                self.triangles.append(T(copy(self.verticies[int(p1)-1]),copy(self.verticies[int(p2)-1]),copy(self.verticies[int(p3)-1])))
+                self.triangles.append(T(copy(self.verticies[int(p1)-1]),
+                                        copy(self.verticies[int(p2)-1]),
+                                        copy(self.verticies[int(p3)-1])))
 
     def rotZ(self,xc,yc,angle):
         for t in self.triangles:
@@ -203,7 +228,9 @@ class Mesh:
             x+=nc.x
             y+=nc.y
             z+=nc.z
-        return(V(x/len(self.triangles),y/len(self.triangles),z/len(self.triangles)))
+        return(V(x/len(self.triangles),
+                 y/len(self.triangles),
+                 z/len(self.triangles)))
 
 
     def __repr__(self):
@@ -272,5 +299,6 @@ while running:
     get_input(obj)
     pygame.display.update()
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+        keys = pygame.key.get_pressed()
+        if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
             running = False
