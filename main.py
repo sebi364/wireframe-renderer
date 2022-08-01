@@ -15,11 +15,13 @@ RES_Y = 1000
 MESH_COLOR = [255,255,255]
 WIREFRAME_COLOR = [128,128,128]
 VERTICES_COLOR = [0,255,0]
+NORMALS_COLOR = [255,255,0]
 #visibility
 RENDER_WIREFRAME = True
 RENDER_TRIANGLES = True
 RENDER_HIDDEN_TRIANGLES = False
 RENDER_VERTICES = False
+RENDER_NORMALS = False
 #movement
 ROTATION_SPEED = 2
 MOVE_SPEED = 5
@@ -86,7 +88,7 @@ class L:
         self.p2.move(dx,dy,dz)
 
     def draw(self,screen):
-        pygame.draw.line(screen,'white',self.p1.project2D(),self.p2.project2D(),2)
+        pygame.draw.line(screen,'yellow',self.p1.project2D(),self.p2.project2D(),2)
 
 
 class T:
@@ -121,19 +123,26 @@ class T:
     def draw(self,screen):
         normal = self.normal()
         c = self.center()
+        # from now we treat c as vector, not point
+        # it now points from camera to triangle
+        # get length of c
         l = sqrt(c.x*c.x+c.y*c.y+c.z*c.z)
+        # normalize c to length 1 and invert direction
+        # (it will point from triangle to camera)
         c.x = -c.x / l
         c.y = -c.y / l
         c.z = -c.z / l
-        dot = normal.x * c.x + normal.y * c.y + normal.z * c.z
+        # calculate dot product between two vectors
+        # this will return between 1.0 (if angle is 0)
+        # and 0.0 (if angle is 90)
+        dotproduct = normal.x * c.x + normal.y * c.y + normal.z * c.z
 
         if RENDER_HIDDEN_TRIANGLES:
-            light = abs(155*dot)+100
-            color = (light*MESH_COLOR[0]/255,
-                     light*MESH_COLOR[1]/255,
-                     light*MESH_COLOR[2]/255)
-
+            light = abs(155*dotproduct)+100
             if RENDER_TRIANGLES:
+                color = (light*MESH_COLOR[0]/255,
+                        light*MESH_COLOR[1]/255,
+                        light*MESH_COLOR[2]/255)
                 pygame.draw.polygon(screen,color,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()])
             if RENDER_WIREFRAME:
                 pygame.draw.polygon(screen,WIREFRAME_COLOR,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()],1)
@@ -142,15 +151,18 @@ class T:
                 self.p2.draw(screen)
                 self.p3.draw(screen)
                 c.draw(screen)
+            if RENDER_NORMALS:
+                point1 = self.center()
+                point2 = V((point1.x + normal.x),(point1.y + normal.y),(point1.z + normal.z))
+                pygame.draw.line(screen,NORMALS_COLOR,point1.project2D(),point2.project2D(),1)
 
         else:
-            if (dot>=0):
-                light = abs(155*dot)+100
-                color = (light*MESH_COLOR[0]/255,
-                         light*MESH_COLOR[1]/255,
-                         light*MESH_COLOR[2]/255)
-
+            if (dotproduct>=0):
+                light = abs(155*dotproduct)+100
                 if RENDER_TRIANGLES:
+                    color = (light*MESH_COLOR[0]/255,
+                             light*MESH_COLOR[1]/255,
+                             light*MESH_COLOR[2]/255)
                     pygame.draw.polygon(screen,color,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()])
                 if RENDER_WIREFRAME:
                     pygame.draw.polygon(screen,WIREFRAME_COLOR,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()],1)
@@ -159,8 +171,10 @@ class T:
                     self.p2.draw(screen)
                     self.p3.draw(screen)
                     c.draw(screen)
-
-
+                if RENDER_NORMALS:
+                    point1 = self.center()
+                    point2 = V((point1.x + normal.x),(point1.y + normal.y),(point1.z + normal.z))
+                    pygame.draw.line(screen,NORMALS_COLOR,point1.project2D(),point2.project2D(),1)
 
     def center(self):
         return V((self.p1.x+self.p2.x+self.p3.x)/3.0,
@@ -176,10 +190,13 @@ class T:
         vy = self.p3.y-self.p1.y
         vz = self.p3.z-self.p1.z
 
+        # calculate normal vector to u and v
         x=uy*vz-uz*vy
         y=uz*vx-ux*vz
         z=ux*vy-uy*vx
+        # calculate length of normal vector
         l=sqrt((x*x)+(y*y)+(z*z))
+        # return normal vector normalized to length=1
         return V(x/l, y/l, z/l)
 
 class Mesh:
