@@ -140,8 +140,23 @@ class T:
         return V(x/l, y/l, z/l)
 
 class Mesh:
-    def __init__(self,triangles):
-        self.triangles = triangles
+    def __init__(self):
+        self.verticies = []
+        self.triangles = []
+
+        file = open(sys.argv[1],'r')
+        for line in file.readlines():
+            line = line[:-1]
+            if line[0] == "o":
+                pygame.display.set_caption(line[2:])
+            if line[0] == "v":
+                line = line[2:]
+                (x,y,z)=line.split(' ')
+                self.verticies.append(V(float(x),float(y),float(z)))
+            if line[0] == "f":
+                line = line[2:]
+                (p1,p2,p3)=line.split(' ')
+                self.triangles.append(T(copy(self.verticies[int(p1)-1]),copy(self.verticies[int(p2)-1]),copy(self.verticies[int(p3)-1])))
 
     def rotZ(self,xc,yc,angle):
         for t in self.triangles:
@@ -168,7 +183,7 @@ class Mesh:
             x+=nc.x
             y+=nc.y
             z+=nc.z
-        return(V(x/len(triangles),y/len(triangles),z/len(triangles)))
+        return(V(x/len(self.triangles),y/len(self.triangles),z/len(self.triangles)))
 
 
     def __repr__(self):
@@ -220,28 +235,7 @@ pygame.init()
 screen = pygame.display.set_mode([RES_X, RES_Y])
 
 
-file = open(sys.argv[1],'r')
-verticies = []
-triangles = []
-for line in file.readlines():
-    line = line[:-1]
-    if line[0] == "o":
-        pygame.display.set_caption(line[2:])
-    if line[0] == "v":
-        line = line[2:]
-        (x,y,z)=line.split(' ')
-        verticies.append(V(float(x),float(y),float(z)))
-    if line[0] == "f":
-        line = line[2:]
-        (p1,p2,p3)=line.split(' ')
-        triangles.append(T(copy(verticies[int(p1)-1]),copy(verticies[int(p2)-1]),copy(verticies[int(p3)-1])))
-
-
-
-
-
-
-obj = Mesh(triangles)
+obj = Mesh()
 
 obj.move(0,0,10)
 
