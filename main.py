@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from math import sin,cos,sqrt
+from math import sin,cos,sqrt,dist
 from copy import copy
 import pygame
 import sys
@@ -16,12 +16,9 @@ TRIANGLE_COLOR = [255,255,255]
 WIREFRAME_COLOR = [128,128,128]
 VERTICES_COLOR = [0,255,0]
 NORMALS_COLOR = [255,255,0]
-#visibility
-RENDER_WIREFRAME = False
-RENDER_TRIANGLES = True
-RENDER_HIDDEN_TRIANGLES = False
-RENDER_VERTICES = False
-RENDER_NORMALS = False
+BACKGROUND_COLOR = [0,0,0]
+UI_COLOR = [100,100,100]
+TEXT_COLOR = [255,255,255]
 #movement
 ROTATION_SPEED = 2
 MOVE_SPEED = 5
@@ -31,7 +28,8 @@ running = True
 DIST = 1.0
 last_time = 0
 delta = 0
-is_fullscreen = False
+is_mouse_pressed = False
+is_mouse_just_pressed = False
 
 class V:
     def __init__(self, x,y,z):
@@ -138,21 +136,26 @@ class T:
         #source = https://www.wikihow.com/Find-the-Angle-Between-Two-Vectors
         dotproduct = normal.x * c.x + normal.y * c.y + normal.z * c.z
 
-        if RENDER_HIDDEN_TRIANGLES:
+        #shorten nomal so it looks better
+        normal.x = normal.x / 2
+        normal.y = normal.y / 2
+        normal.z = normal.z / 2
+
+        if set.hidden_triangles.state:
             light = abs(155*dotproduct)+100
-            if RENDER_TRIANGLES:
+            if set.triangles.state:
                 color = (light*TRIANGLE_COLOR[0]/255,
                         light*TRIANGLE_COLOR[1]/255,
                         light*TRIANGLE_COLOR[2]/255)
                 pygame.draw.polygon(screen,color,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()])
-            if RENDER_WIREFRAME:
+            if set.wireframe.state:
                 pygame.draw.polygon(screen,WIREFRAME_COLOR,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()],1)
-            if RENDER_VERTICES:
+            if set.verticies.state:
                 self.p1.draw(screen)
                 self.p2.draw(screen)
                 self.p3.draw(screen)
                 c.draw(screen)
-            if RENDER_NORMALS:
+            if set.normals.state:
                 point1 = self.center()
                 point2 = V((point1.x + normal.x),(point1.y + normal.y),(point1.z + normal.z))
                 pygame.draw.line(screen,NORMALS_COLOR,point1.project2D(),point2.project2D(),1)
@@ -160,19 +163,19 @@ class T:
         else:
             if (dotproduct>=0):
                 light = abs(155*dotproduct)+100
-                if RENDER_TRIANGLES:
+                if set.triangles.state:
                     color = (light*TRIANGLE_COLOR[0]/255,
                              light*TRIANGLE_COLOR[1]/255,
                              light*TRIANGLE_COLOR[2]/255)
                     pygame.draw.polygon(screen,color,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()])
-                if RENDER_WIREFRAME:
+                if set.wireframe.state:
                     pygame.draw.polygon(screen,WIREFRAME_COLOR,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()],1)
-                if RENDER_VERTICES:
+                if set.verticies.state:
                     self.p1.draw(screen)
                     self.p2.draw(screen)
                     self.p3.draw(screen)
                     c.draw(screen)
-                if RENDER_NORMALS:
+                if set.normals.state:
                     point1 = self.center()
                     point2 = V((point1.x + normal.x),(point1.y + normal.y),(point1.z + normal.z))
                     pygame.draw.line(screen,NORMALS_COLOR,point1.project2D(),point2.project2D(),1)
@@ -269,10 +272,68 @@ class Mesh:
         for i in list:
             self.triangles[i[0]].draw(screen)
 
+class Option:
+    def __init__(self,name,pos,state):
+        self.name = name
+        self.pos = pos
+        self.state = state
+
+    def update_state(self):
+        if is_mouse_pressed:
+            if dist(self.pos,pygame.mouse.get_pos())<7:
+                if self.state:
+                    self.state = False
+                else:
+                    self.state = True
+
+    def update(self):
+        self.update_state()
+        if self.state:
+            pygame.draw.circle(screen,TEXT_COLOR,self.pos,7)
+        else:
+            pygame.draw.circle(screen,TEXT_COLOR,self.pos,7,2)
+        screen.blit(font.render(self.name, False, TEXT_COLOR), [self.pos[0]-178,self.pos[1]-15])
+
+class Settings:
+    def __init__(self):
+        self.hidden = True
+        self.wireframe = Option("Wireframe",[188,50],False)
+        self.triangles = Option("Triangles",[188,75],True)
+        self.verticies = Option("Vertices",[188,100],False)
+        self.normals = Option("Normals",[188,125],False)
+        self.hidden_triangles = Option("hidden Triangles",[188,150],False)
+
+    def update_state(self):
+        if is_mouse_pressed:
+            pos = pygame.mouse.get_pos()
+            if pos[0] > 5 and pos[0] < 205:
+                if pos[1] > 5 and pos[1] < 40:
+                    if self.hidden:
+                        self.hidden = False
+                    else:
+                        self.hidden = True
+    def update(self):
+        self.update_state()
+        if self.hidden:
+            pygame.draw.rect(screen,UI_COLOR,[5,5,200,35])
+            screen.blit(font.render("Settings", False, TEXT_COLOR), (10,10))
+            pygame.draw.polygon(screen,TEXT_COLOR,[(183,15),(188.5,25),(193,15)])
+        else:
+            pygame.draw.rect(screen,UI_COLOR,[5,5,200,400])
+            screen.blit(font.render("Settings", False, TEXT_COLOR), (10,10))
+            pygame.draw.polygon(screen,TEXT_COLOR,[(183,25),(188.5,15),(193,25)])
+
+            self.wireframe.update()
+            self.triangles.update()
+            self.verticies.update()
+            self.normals.update()
+            self.hidden_triangles.update()
+
+
 def get_input(object):
-    global is_fullscreen
     keys = pygame.key.get_pressed()
     center = object.center()
+
     if keys[pygame.K_UP]:
         object.rotX(center.z,center.y,ROTATION_SPEED*delta)
     if keys[pygame.K_DOWN]:
@@ -303,20 +364,27 @@ def get_input(object):
     if keys[pygame.K_s]:
         object.move(0,0,MOVE_SPEED*delta)
 
-    if keys[pygame.K_f]:
-        if is_fullscreen:
-            pygame.display.set_mode([RES_X, RES_Y],pygame.RESIZABLE)
-            is_fullscreen = False
+def get_mouse_input():
+    global is_mouse_pressed
+    global is_mouse_just_pressed
+    mouse_presses = pygame.mouse.get_pressed()
+
+    if mouse_presses[0]:
+        if is_mouse_pressed == False and is_mouse_just_pressed == False:
+            is_mouse_pressed = True
+            is_mouse_just_pressed = True
         else:
-            pygame.display.set_mode([RES_X, RES_Y],pygame.FULLSCREEN)
-            is_fullscreen = True
+            is_mouse_pressed = False
+    else:
+        is_mouse_pressed = False
+        is_mouse_just_pressed = False
 
 pygame.init()
 screen = pygame.display.set_mode([RES_X, RES_Y],pygame.RESIZABLE)
-
+font = pygame.font.Font('font.ttf', 20)
 
 obj = Mesh()
-
+set = Settings()
 obj.move(0,0,10)
 
 while running:
@@ -327,9 +395,11 @@ while running:
     delta = time.time() - last_time
     last_time = time.time()
 
-    screen.fill('black')
+    screen.fill(BACKGROUND_COLOR)
     obj.draw(screen)
+    set.update()
     get_input(obj)
+    get_mouse_input()
     pygame.display.update()
     for event in pygame.event.get():
         keys = pygame.key.get_pressed()
