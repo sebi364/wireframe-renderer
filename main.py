@@ -297,7 +297,7 @@ class Option:
 class Settings:
     def __init__(self):
         self.hidden = True
-        self.wireframe = Option("Wireframe",[188,50],False)
+        self.wireframe = Option("Wireframe",[188,50],True)
         self.triangles = Option("Triangles",[188,75],True)
         self.verticies = Option("Vertices",[188,100],False)
         self.normals = Option("Normals",[188,125],False)
@@ -319,7 +319,7 @@ class Settings:
             screen.blit(font.render("Settings", False, TEXT_COLOR), (10,10))
             pygame.draw.polygon(screen,TEXT_COLOR,[(183,15),(188.5,25),(193,15)])
         else:
-            pygame.draw.rect(screen,UI_COLOR,[5,5,200,400])
+            pygame.draw.rect(screen,UI_COLOR,[5,5,200,160])
             screen.blit(font.render("Settings", False, TEXT_COLOR), (10,10))
             pygame.draw.polygon(screen,TEXT_COLOR,[(183,25),(188.5,15),(193,25)])
 
