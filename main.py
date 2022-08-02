@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 from math import sin,cos,sqrt,dist
 from copy import copy
+from tkinter import filedialog as fd
 import pygame
 import sys
 import time
@@ -210,7 +211,11 @@ class Mesh:
         self.verticies = []
         self.triangles = []
         #load the .obj file
-        file = open(sys.argv[1],'r')
+        try:
+            file = open(sys.argv[1],'r')
+        except Exception as e:
+            file = open(fd.askopenfilename(),'r')
+        
         for line in file.readlines():
             #remove last character "/n"
             line = line[:-1]
