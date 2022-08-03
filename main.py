@@ -212,10 +212,14 @@ class Mesh:
         self.triangles = []
         #load the .obj file
         try:
-            file = open(sys.argv[1],'r')
+            self.loadfile(sys.argv[1])
         except Exception as e:
-            file = open(fd.askopenfilename(),'r')
-        
+            self.loadfile(fd.askopenfilename())
+
+    def loadfile(self,filedir):
+        self.verticies = []
+        self.triangles = []
+        file = open(filedir,'r')
         for line in file.readlines():
             #remove last character "/n"
             line = line[:-1]
@@ -234,6 +238,7 @@ class Mesh:
                 self.triangles.append(T(copy(self.verticies[int(p1)-1]),
                                         copy(self.verticies[int(p2)-1]),
                                         copy(self.verticies[int(p3)-1])))
+        self.move(0,0,10)
 
     def rotZ(self,xc,yc,angle):
         for t in self.triangles:
@@ -298,6 +303,36 @@ class Option:
         else:
             pygame.draw.circle(screen,TEXT_COLOR,self.pos,7,2)
         screen.blit(font.render(self.name, False, TEXT_COLOR), [self.pos[0]-178,self.pos[1]-15])
+
+class Files:
+    def __init__(self):
+        self.hidden = True
+
+    def update_state(self):
+        if is_mouse_pressed:
+            pos = pygame.mouse.get_pos()
+            if pos[0] > 210 and pos[0] < 410:
+                if pos[1] > 5 and pos[1] < 40:
+                    if self.hidden:
+                        self.hidden = False
+                    else:
+                        self.hidden = True
+            if pos[0] > 210 and pos[0] < 410:
+                if pos[1] > 30 and pos[1] < 65:
+                    obj.loadfile(fd.askopenfilename())
+    def update(self):
+        self.update_state()
+        if self.hidden:
+            pygame.draw.rect(screen,UI_COLOR,[210,5,200,35])
+            screen.blit(font.render("File", False, TEXT_COLOR), (215,10))
+            pygame.draw.polygon(screen,TEXT_COLOR,[(388,15),(393.5,25),(398,15)])
+        else:
+            pygame.draw.rect(screen,UI_COLOR,[210,5,200,60])
+            screen.blit(font.render("File", False, TEXT_COLOR), (215,10))
+            pygame.draw.polygon(screen,TEXT_COLOR,[(388,25),(393.5,15),(398,25)])
+
+            screen.blit(font.render("Open File", False, TEXT_COLOR), (215,35))
+
 
 class Settings:
     def __init__(self):
@@ -390,7 +425,7 @@ font = pygame.font.Font('font.ttf', 20)
 
 obj = Mesh()
 set = Settings()
-obj.move(0,0,10)
+fil = Files()
 
 while running:
     RES_X,RES_Y = screen.get_size()
@@ -403,6 +438,7 @@ while running:
     screen.fill(BACKGROUND_COLOR)
     obj.draw(screen)
     set.update()
+    fil.update()
     get_input(obj)
     get_mouse_input()
     pygame.display.update()
