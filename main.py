@@ -2,6 +2,8 @@
 from math import sin,cos,sqrt,dist
 from copy import copy
 from tkinter import filedialog as fd
+from os import environ
+environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 import sys
 import time
