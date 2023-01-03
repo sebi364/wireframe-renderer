@@ -32,11 +32,11 @@ class V:
     def __repr__(self):
         return "("+str(self.x)+","+str(self.y)+","+str(self.z)+")"
     #calculate 2D coordinates for the screen
-    def project2D(self):
+
+    def project2D(self, screen):
         FOV_X = 1.5
         FOV_Y = 1.0
-        RES_X = 1500
-        RES_Y = 1000
+        RES_X, RES_Y = screen.get_size()
         DIST = 1.0
 
         x = (self.x/self.z*DIST+FOV_X/2.0)*RES_X/FOV_X
@@ -61,7 +61,7 @@ class V:
         self.z += dz
 
     def draw(self,screen):
-        pygame.draw.circle(screen,VERTICES_COLOR,self.project2D(),3)
+        pygame.draw.circle(screen,VERTICES_COLOR,self.project2D(screen),3)
 
 class T:
     def __init__(self,p1,p2,p3):
@@ -120,9 +120,9 @@ class T:
                 color = (light*TRIANGLE_COLOR[0]/255,
                         light*TRIANGLE_COLOR[1]/255,
                         light*TRIANGLE_COLOR[2]/255)
-                pygame.draw.polygon(screen,color,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()])
+                pygame.draw.polygon(screen,color,[self.p1.project2D(screen),self.p2.project2D(screen),self.p3.project2D(screen)])
             if draw_Wireframe:
-                pygame.draw.polygon(screen,WIREFRAME_COLOR,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()],1)
+                pygame.draw.polygon(screen,WIREFRAME_COLOR,[self.p1.project2D(screen),self.p2.project2D(screen),self.p3.project2D(screen)],1)
             if draw_Vertices:
                 self.p1.draw(screen)
                 self.p2.draw(screen)
@@ -131,7 +131,7 @@ class T:
             if draw_Normals:
                 point1 = self.center()
                 point2 = V((point1.x + normal.x),(point1.y + normal.y),(point1.z + normal.z))
-                pygame.draw.line(screen,NORMALS_COLOR,point1.project2D(),point2.project2D(),1)
+                pygame.draw.line(screen,NORMALS_COLOR,point1.project2D(screen),point2.project2D(screen),1)
 
         else:
             if (dotproduct>=0):
@@ -140,9 +140,9 @@ class T:
                     color = (light*TRIANGLE_COLOR[0]/255,
                              light*TRIANGLE_COLOR[1]/255,
                              light*TRIANGLE_COLOR[2]/255)
-                    pygame.draw.polygon(screen,color,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()])
+                    pygame.draw.polygon(screen,color,[self.p1.project2D(screen),self.p2.project2D(screen),self.p3.project2D(screen)])
                 if draw_Wireframe:
-                    pygame.draw.polygon(screen,WIREFRAME_COLOR,[self.p1.project2D(),self.p2.project2D(),self.p3.project2D()],1)
+                    pygame.draw.polygon(screen,WIREFRAME_COLOR,[self.p1.project2D(screen),self.p2.project2D(screen),self.p3.project2D(screen)],1)
                 if draw_Vertices:
                     self.p1.draw(screen)
                     self.p2.draw(screen)
@@ -151,7 +151,7 @@ class T:
                 if draw_Normals:
                     point1 = self.center()
                     point2 = V((point1.x + normal.x),(point1.y + normal.y),(point1.z + normal.z))
-                    pygame.draw.line(screen,NORMALS_COLOR,point1.project2D(),point2.project2D(),1)
+                    pygame.draw.line(screen,NORMALS_COLOR,point1.project2D(screen),point2.project2D(screen),1)
 
     def center(self):
         #calculate the center of the triangle
