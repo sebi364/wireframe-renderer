@@ -1,7 +1,17 @@
 # 3d-Viewer
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Sebi364/3d-Viewer/main/Screenshots/1.jpg" alt="Sublime's custom image"/>
-</p>
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Sebi364/3d-Viewer/main/Screenshots/2.jpg" alt="Sublime's custom image"/>
-</p>
+## This is a basic wireframe renderer written in python / Pygame and ported to the web.
+[link](http://rychcik.ch/wireframe-renderer/)
+## Controls:
+- Move Camera : `W`, `A`, `S`, `D`, `E`, `Q`
+- Rotate Modell : `Up`, `Down`, `Left`, `Right`, `PegUp`, `PgDn`
+- Toggle Settings
+  - Toggle Polygons = `C`
+  - Toggle Wireframe = `V`
+  - Toggle Vertices = `B`
+  - Toggle Normals = `N`
+  - Toggle Hidden Polygons = `M`
+- Load different Models
+  - `1` = Cube
+  - `2` = Monkey
+  - `3` = Plane
+  - `4` = Porsche
