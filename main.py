@@ -182,7 +182,7 @@ class M:
     def __init__(self):
         self.verticies = []
         self.triangles = []
-        self.loadfile('plane.obj')
+        self.loadfile('Models/plane.obj')
 
     def loadfile(self, filedir):
         self.verticies = []
@@ -324,19 +324,19 @@ def get_input(object):
         time.sleep(0.2)
     
     if keys[pygame.K_1]:
-        object.loadfile('cube.obj')
+        object.loadfile('Models/cube.obj')
         time.sleep(0.2)
     
     if keys[pygame.K_2]:
-        object.loadfile('plane.obj')
+        object.loadfile('Models/plane.obj')
         time.sleep(0.2)
     
     if keys[pygame.K_3]:
-        object.loadfile('monkey.obj')
+        object.loadfile('Models/monkey.obj')
         time.sleep(0.2)
     
     if keys[pygame.K_4]:
-        object.loadfile('porsche.obj')
+        object.loadfile('Models/porsche.obj')
         time.sleep(0.2)
 
 
