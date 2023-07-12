@@ -1,6 +1,6 @@
 # 3d-Viewer
 ## This is a basic wireframe renderer written in python / Pygame and ported to the web.
-[link](http://rychcik.ch/wireframe-renderer/)
+[link](https://rychcik.ch/Demos/3D/)
 ## Controls:
 - Move Camera : `W`, `A`, `S`, `D`, `E`, `Q`
 - Rotate Modell : `Up`, `Down`, `Left`, `Right`, `PegUp`, `PgDn`
