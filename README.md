@@ -1,6 +1,10 @@
 # 3d-Viewer
-## This is a basic wireframe renderer written in python / Pygame and ported to the web.
-[link](https://rychcik.ch/Demos/3D/)
+[![Build and Deploy](https://github.com/sebi364/wireframe-renderer/actions/workflows/deploy.yml/badge.svg)](https://github.com/sebi364/wireframe-renderer/actions/workflows/deploy.yml)
+This is a basic wireframe renderer written in python / Pygame and ported to the web using pygbag.
+![](./Pictures/Plane.png)
+![](./Pictures/Porsche.png)
+## Web Demo:
+https://sebi364.github.io/wireframe-renderer/
 ## Controls:
 - Move Camera : `W`, `A`, `S`, `D`, `E`, `Q`
 - Rotate Modell : `Up`, `Down`, `Left`, `Right`, `PegUp`, `PgDn`
